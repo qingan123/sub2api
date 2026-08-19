@@ -1,3 +1,21 @@
+## 我的版本部署
+
+```bash
+bash scripts/install.sh
+```
+
+## 官方版本部署
+
+```bash
+bash scripts/one-click-install.sh
+```
+
+## 版本更新
+
+```bash
+bash scripts/update.sh
+```
+
 <div align="center">
 
 <img src="assets/logo.svg" alt="Sub2API Logo" width="128" />
