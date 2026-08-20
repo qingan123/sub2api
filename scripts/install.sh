@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 REPO_URL=${REPO_URL:-https://github.com/qingan123/sub2api.git}
-APP_DIR=${APP_DIR:-/opt/sub2api}
+APP_DIR_BASE=${APP_DIR_BASE:-${APP_DIR:-/opt/sub2api}}
 PORT=${SUB2API_PORT:-8080}
 fail(){ echo "ERROR: $*" >&2; exit 1; }
 read_tty(){ local v; IFS= read -r -p "$1" v </dev/tty || fail '需要交互终端'; printf '%s' "$v"; }
 read_secret(){ local v; IFS= read -r -s -p "$1" v </dev/tty || fail '需要交互终端'; printf '\n' >/dev/tty; printf '%s' "$v"; }
 [[ $EUID -eq 0 ]] || fail '请使用root/sudo'
 command -v git >/dev/null || fail '缺少git'; command -v docker >/dev/null || fail '缺少docker'; docker compose version >/dev/null || fail '需要Docker Compose v2'
-APP_DIR=$(read_tty "部署目录 [$APP_DIR]: "); APP_DIR=${APP_DIR:-/opt/sub2api}
 PORT=$(read_tty "端口 [$PORT]: "); PORT=${PORT:-8080}
 [[ $PORT =~ ^[0-9]+$ && $PORT -ge 1 && $PORT -le 65535 ]] || fail '端口无效'
+APP_DIR="$APP_DIR_BASE"; [[ "$PORT" == 8080 ]] || APP_DIR="${APP_DIR_BASE}-${PORT}"
+printf '安装目录自动设置为: %s\n' "$APP_DIR"
 if command -v ss >/dev/null && ss -ltn "sport = :$PORT" | grep -q LISTEN; then fail "端口 $PORT 已被占用"; fi
 admin=$(read_tty '管理员邮箱: '); [[ -n "$admin" ]] || fail '管理员邮箱不能为空'
 pass=$(read_secret '管理员密码: '); confirm=$(read_secret '确认管理员密码: '); [[ "$pass" == "$confirm" ]] || fail '密码不一致'; [[ ${#pass} -ge 6 ]] || fail '密码至少6位'
